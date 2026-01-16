@@ -83,12 +83,11 @@ app.post("/vote", async (req, res) => {
 
   const voteHash = sha256(voterId + candidateId + new Date().toISOString());
 
-  const tx = await votingContract.castVote(
-    "0x" + voteHash 
-  );
+  const tx = await votingContract.castVote("0x" + voteHash);
   await tx.wait();
 
-  await tx.wait();
+  candidate.votes += 1;
+  await candidate.save();
 
   voter.hasVoted = true;
   await voter.save();
@@ -104,10 +103,46 @@ app.get("/candidates", async (req, res) => {
   res.json(candidates);
 });
 
-app.get("/results", async (req, res) => {
-  const totalVotes = await votingContract.getTotalVotes();
-  res.json({ totalVotes: totalVotes.toString() });
+app.get("/check-contract", async (req, res) => {
+  try {
+    const code = await votingContract.provider.getCode(votingContract.address);
+    res.json({ code });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
 });
+
+app.get("/__debug_contract__", async (req, res) => {
+  try {
+    const address = votingContract.address;
+    const network = await votingContract.provider.getNetwork();
+    const code = await votingContract.provider.getCode(address);
+
+    res.json({
+      contractAddress: address,
+      chainId: network.chainId,
+      codeExists: code !== "0x",
+      codeLength: code.length,
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.get("/results", async (req, res) => {
+  const results = await Candidate.aggregate([
+    {
+      $group: {
+        _id: "$party",
+        seats: { $sum: "$votes" }
+      }
+    },
+    { $sort: { seats: -1 } }
+  ]);
+
+  res.json(results);
+});
+
 
 app.listen(3000, () => {
   console.log("Server started on http://localhost:3000");

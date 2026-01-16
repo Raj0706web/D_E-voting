@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Election Results</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body style="max-width:500px;margin:auto;">
+
+<h3 style="text-align:center;">Party-wise Seats Won</h3>
+
+<canvas id="chart" height="250"></canvas>
+
+<script>
+async function drawChart() {
+  const res = await fetch("http://localhost:3000/results");
+  const data = await res.json();
+
+  new Chart(document.getElementById("chart"), {
+    type: "bar",
+    data: {
+      labels: data.map(d => d._id),
+      datasets: [{
+        data: data.map(d => d.seats),
+        backgroundColor: "#ff9933"
+      }]
+    },
+    options: {
+      plugins: {
+        legend: { display: false }
+      },
+      scales: {
+        y: { beginAtZero: true }
+      }
+    }
+  });
+}
+
+drawChart();
+</script>
+
+</body>
+</html>

@@ -5,13 +5,13 @@ const provider = new ethers.providers.JsonRpcProvider(
 );
 
 // 🔑 Private key from Ganache (WITHOUT 0x)
-const privateKey = "24a673a68cdab6f564de292e70fc482b7ddb01d2f712d2f2e08937d20aee5ac5";
+const privateKey = "cab40402a8c8af4ea60f93da8051e65562328d14a5340026d06aa9aa739485ab";
 
 // Wallet
 const wallet = new ethers.Wallet(privateKey, provider);
 
 // 📄 Contract details
-const contractAddress = "0x9D7f74d0C41E726EC95884E0e97Fa6129e3b5E99";
+const contractAddress = "0xc40C972C94B97b8EC81b266962C2bB1F6C090fe9";
 const contractABI = [
 	{
 		"inputs": [
